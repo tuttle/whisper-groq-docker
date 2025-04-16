@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# SPEECH TO TEXT (STT)
+
+# Using Whisper Groq Speech To Text service. Reference: https://console.groq.com/docs/speech-to-text
+
+
+: <<'__end__'   # multiline comment start
+
+ENV VARS IN YOUR .bashrc:
+
+export GROQ_API_KEY=<YOUR_API_KEY>            # required
+
+export GROQ_MODEL=whisper-large-v3-turbo      # the default
+
+# The language of the input audio. Values of ISO-639-1 (i.e. en, cs, ...) will improve accuracy and latency.
+export GROQ_LANGUAGE_CODE=en                  # the default, use 'cs' for Czech
+
+# Prompt to guide the model's style or specify how to spell unfamiliar words. (limited to 224 tokens)
+export GROQ_PROMPT="..."
+
+export GROQ_TEMPERATURE=0.5                   # the default is 0
+
+__end__
+
+
+DIR="${WHISPER_GROQ_AUDIOS_DIR:-/tmp/whisper-groq-audios}"
+
+mkdir -p "$DIR" || exit 1
+
+AUDIO_FILE_NAME="capture-$(printf '%(%Y%m%d-%H%M%S)T').wav"
+
+echo "Running arecord, press Ctrl+C to start transcription..." >&2
+
+arecord -vv -fdat -c 1 -r8000 "$DIR/$AUDIO_FILE_NAME"
+
+echo -e "\n\nConverting WAV audio file $DIR/$AUDIO_FILE_NAME of $(stat -c%s "$DIR/$AUDIO_FILE_NAME") bytes to TEXT..." >&2
+
+docker run --rm -e GROQ_API_KEY -e GROQ_MODEL -e GROQ_LANGUAGE_CODE -e GROQ_PROMPT -e GROQ_TEMPERATURE \
+    -v "$DIR:/data:ro" \
+    whisper-groq-docker \
+    /venv/bin/python /venv/run.py /data/$AUDIO_FILE_NAME \
+> "$DIR/$AUDIO_FILE_NAME.txt"
+
+echo -e "Text transcription saved to $DIR/$AUDIO_FILE_NAME.txt\n" >&2
+
+cat "$DIR/$AUDIO_FILE_NAME.txt"
