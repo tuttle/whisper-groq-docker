@@ -32,7 +32,7 @@ AUDIO_FILE_NAME="capture-$(printf '%(%Y%m%d-%H%M%S)T').wav"
 
 echo "Running arecord, press Ctrl+C to start transcription..." >&2
 
-arecord -vv -fdat -c 1 -r8000 "$DIR/$AUDIO_FILE_NAME"
+arecord -vv -fdat -c 1 -r22500 "$DIR/$AUDIO_FILE_NAME"
 
 echo -e "\n\nConverting WAV audio file $DIR/$AUDIO_FILE_NAME of $(stat -c%s "$DIR/$AUDIO_FILE_NAME") bytes to TEXT..." >&2
 

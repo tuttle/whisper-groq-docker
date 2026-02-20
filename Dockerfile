@@ -5,7 +5,7 @@
 #
 ################################################################################
 
-FROM python:3.11-buster AS builder
+FROM python:3.14-slim-trixie AS builder
 
 # Disabled bytecode writing to reduce size and improve startup, further optimizations
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -25,7 +25,7 @@ COPY run.py /venv
 
 ################################################################################
 
-FROM python:3.11-slim-buster AS runner
+FROM python:3.14-slim-trixie AS runner
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
